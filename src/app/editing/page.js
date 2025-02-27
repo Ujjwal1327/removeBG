@@ -13,7 +13,7 @@ import { RiSubtractLine } from "react-icons/ri";
 import { PiArrowBendUpLeftBold } from "react-icons/pi";
 import { PiArrowBendUpRightBold } from "react-icons/pi";
 import { RiDeleteBin5Line } from "react-icons/ri";
-
+import { useRef } from "react";
 
 
 const EditingPage = () => {
@@ -26,6 +26,8 @@ const EditingPage = () => {
     const [isMetrics, setIsMetrics] = useState(false)
     const [konvaRemImage, setKonvaRemImage] = useState(null);
     const router = useRouter();
+    const stageRef = useRef(null); // Stage ka reference
+
     const [tempBlurValue, setTempBlurValue] = useState(0);
     // ✅ Ensure `imageObj` is always defined
     const imageObj = images.find(img => img.id === activeImage) || { history: [], activeSnap: 0 };
@@ -39,6 +41,17 @@ const EditingPage = () => {
             handleRedo()
         }
     }
+    const handleDownload = () => {
+        if (stageRef.current) {
+            const uri = stageRef.current.toDataURL(); // Stage ko image me convert karna
+            const link = document.createElement("a");
+            link.href = uri;
+            link.download = "konva-stage.png"; // File name
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
     const handleCheckboxChange = (isChecked) => {
         addSnap({
             removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
@@ -106,6 +119,7 @@ const EditingPage = () => {
 
         // ✅ Convert canvas to Image
         const img = new window.Image();
+        img.crossOrigin = "anonymous";
         img.src = canvas.toDataURL();  // Convert canvas to data URL
         return img;
     };
@@ -133,6 +147,7 @@ const EditingPage = () => {
         const snapData = currentImage.history[currentImage.activeSnap];
 
         const img = new window.Image();
+        img.crossOrigin = "anonymous";
         img.src = snapData.removeBgUrl || "";
         img.onload = () => setKonvaRemImage(img);
     }, [currentImage, activeImage]);
@@ -163,7 +178,7 @@ const EditingPage = () => {
                     <div className="flex w-full mb-10 gap-10 items-stretch justify-center  rounded-lg overflow-hidden">
                         {/*image left section*/}
                         <div className="flex-1 flex flex-col items-end">
-                            <Stage width={400} height={400} className="rounded-2xl shadow-xl border-1 border-gray-400 overflow-hidden">
+                            <Stage ref={stageRef} width={400} height={400} className="rounded-2xl shadow-xl border-1 border-gray-400 overflow-hidden">
                                 <Layer >
                                     {/* Transparent tru ho tab */}
                                     {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].transparent && (
@@ -210,7 +225,7 @@ const EditingPage = () => {
                                 {
                                     currentImage.activeSnap == currentImage.history.length - 1 ? (<button className="text-gray-500 cursor-not-allowed" onClick={reduFun} ><PiArrowBendUpRightBold /></button>) : (<button className="hover:scale-110 text-black" onClick={reduFun} ><PiArrowBendUpRightBold /></button>)
                                 }
-                                <button className="hover:bg-blue-600 py-1 px-8 rounded-3xl text-nowrap bg-blue-500 text-white">Download </button>
+                                <button onClick={handleDownload} className="hover:bg-blue-600 py-1 px-8 rounded-3xl text-nowrap bg-blue-500 text-white">Download </button>
                             </div>
                         </div>
                         {/*image right section*/}
