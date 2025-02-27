@@ -24,7 +24,7 @@ const useRemoveBg = (imageUrl, setLoading) => {
             const res = await fetch("https://api.remove.bg/v1.0/removebg", {
                 method: "POST",
                 headers: {
-                    "X-Api-Key": "x849qnAjMPZnzFhW6Rkhp8bS", // 🔑 Replace with valid API Key
+                    "X-Api-Key": "1jt6RCQvkRezz9G3Mbca7F7z", // 🔑 Replace with valid API Key
                 },
                 body: formData,
             });

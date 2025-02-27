@@ -23,8 +23,10 @@ const EditingPage = () => {
     const [currentImage, setCurrentImage] = useState({})
     const [selectedPhoto, setSelectedPhoto] = useState(true)
     const [isBgOn, setIsBgOn] = useState(false)
+    const [isMetrics, setIsMetrics] = useState(false)
     const [konvaRemImage, setKonvaRemImage] = useState(null);
     const router = useRouter();
+    const [tempBlurValue, setTempBlurValue] = useState(0);
     // ✅ Ensure `imageObj` is always defined
     const imageObj = images.find(img => img.id === activeImage) || { history: [], activeSnap: 0 };
     // ✅ Check if BG Removal is needed
@@ -37,6 +39,28 @@ const EditingPage = () => {
             handleRedo()
         }
     }
+    const handleCheckboxChange = (isChecked) => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: isChecked, // ✅ Checkbox ka value
+            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            opacity: currentImage.history[currentImage.activeSnap].opacity,
+        });
+    };
+    const handleSliderRelease = () => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
+            blurValue: Number(tempBlurValue), // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            opacity: currentImage.history[currentImage.activeSnap].opacity,
+        });
+    }
     const handleImageClick = (imgSrc) => {
         const imageObj = new window.Image();
         imageObj.crossOrigin = "Anonymous"; // CORS issue avoid करने के लिए
@@ -48,10 +72,12 @@ const EditingPage = () => {
             addSnap({
                 removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
                 color: null,
+                isBlur: false,
+                blurValue: 0,
                 bgImage: imageObj, // ✅ Corrected Image URL
                 transparent: false,
                 opacity: null,
-                blur: null,
+
             });
         };
 
@@ -90,10 +116,12 @@ const EditingPage = () => {
             addSnap({
                 removeBgUrl: processedImageUrl,
                 color: null,
+                isBlur: false,
+                blurValue: 0,
                 bgImage: null,
                 transparent: true,
                 opacity: null,
-                blur: null,
+
             });
         }
         // console.log(currentImage)
@@ -116,6 +144,7 @@ const EditingPage = () => {
     useEffect(() => {
         console.log("Updated isBgOn:", isBgOn);
     }, [isBgOn]);
+    console.log(images)
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-white">
             {
@@ -153,7 +182,19 @@ const EditingPage = () => {
                                         />
                                     )}
                                     {/*  background me koi image save ho tab */}
-                                    {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].bgImage && <Image image={currentImage.history[currentImage.activeSnap].bgImage} width={400} height={400} />}
+                                    {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].bgImage && <Image
+                                        image={currentImage.history[currentImage.activeSnap].bgImage}
+                                        filters={[Konva.Filters.Blur]} // Blur filter apply kar raha hai
+                                        blurRadius={currentImage.history[currentImage.activeSnap].isBlur ? currentImage.history[currentImage.activeSnap].blurValue : 0} // Blur intensity
+                                        width={400}
+                                        height={400}
+                                        ref={(node) => {
+                                            if (node) {
+                                                node.cache(); // Filters ko properly apply karne ke liye
+                                                node.getLayer().batchDraw(); // Canvas ko update karne ke liye
+                                            }
+                                        }}
+                                    />}
                                     {/* ✅removed bg Image show karo top pe */}
                                     {konvaRemImage && <Image image={konvaRemImage} width={400} height={400} />}
                                 </Layer>
@@ -166,7 +207,6 @@ const EditingPage = () => {
                                 {
                                     currentImage.activeSnap == 0 ? (<button className=" text-gray-500 cursor-not-allowed" onClick={undoFun}><PiArrowBendUpLeftBold /></button>) : (<button className="hover:scale-110 text-black" onClick={undoFun}><PiArrowBendUpLeftBold /></button>)
                                 }
-
                                 {
                                     currentImage.activeSnap == currentImage.history.length - 1 ? (<button className="text-gray-500 cursor-not-allowed" onClick={reduFun} ><PiArrowBendUpRightBold /></button>) : (<button className="hover:scale-110 text-black" onClick={reduFun} ><PiArrowBendUpRightBold /></button>)
                                 }
@@ -182,10 +222,6 @@ const EditingPage = () => {
                                 <span className="text-gray-600 font-semibold transition-transform duration-200 group-hover:scale-105">
                                     Background <span className="p-1 bg-yellow-400 rounded-2xl">New</span>
                                 </span>
-
-
-
-
                             </div>
                             {
                                 isBgOn ? (<div className={`${isBgOn ? "block" : "hidden"} absolute top-0 left-0 shadow-2xl bg-gray-200 overflow-auto p-3 min-w-80 rounded-2xl`}>
@@ -234,10 +270,13 @@ const EditingPage = () => {
                                                             addSnap({
                                                                 removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
                                                                 color: item,
+                                                                isBlur: false,
+                                                                blurValue: 0,
                                                                 bgImage: null, // ✅ Corrected Image URL
                                                                 transparent: false,
                                                                 opacity: null,
-                                                                blur: null,
+
+
                                                             });
                                                         }}
                                                         style={{ backgroundColor: `${item}` }}
@@ -252,7 +291,7 @@ const EditingPage = () => {
                                     }
                                 </div>) : null
                             }
-                            <div className="group mb-5 flex items-center gap-2 cursor-pointer p-2">
+                            <div className="group mb-5 flex items-center gap-2 cursor-pointer p-2" onClick={() => setIsMetrics(true)}>
                                 <div className="border-4 border-gray-300 rounded-full transition-transform duration-200 group-hover:scale-105">
                                     <MdAutoFixHigh className="p-1 text-3xl text-gray-500" />
                                 </div>
@@ -260,7 +299,66 @@ const EditingPage = () => {
                                     Effects
                                 </span>
                             </div>
+                            {
+                                isMetrics && currentImage && currentImage.history[currentImage.activeSnap] ? (<div className={`${isMetrics ? "block" : "hidden"} absolute top-0 left-0 shadow-2xl bg-gray-200 overflow-auto p-3 px-6 min-w-80  min-h-64 rounded-2xl`}>
 
+                                    <div onClick={() => {
+                                        console.log("clicked on cut");
+                                        setIsMetrics((prev) => {
+                                            return false;
+                                        });
+                                    }} className=" right-2 top-2 bg-black text-white text-2xl absolute rounded-full rotate-45 cursor-pointer">
+                                        <MdAdd />
+                                    </div>
+                                    <div className="mb-10">
+
+                                    </div>
+                                    <div>
+                                        <label className="flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={currentImage.history[currentImage.activeSnap].isBlur}
+                                                onChange={(e) => handleCheckboxChange(e.target.checked)}
+                                            />
+
+                                            <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 relative transition-all duration-300">
+                                                <div className="w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-1 transition-all duration-300 peer-checked:left-6"></div>
+                                            </div>
+
+                                            <span className="ml-2 text-lg font-medium text-gray-700">Blur background</span>
+                                        </label>
+
+                                    </div>
+                                    <div className="my-4">
+
+                                    </div>
+                                    <label className="ml-2 text-lg font-medium text-gray-700"> Blur amount
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max="50"
+                                        value={currentImage.history[currentImage.activeSnap].blurValue}
+                                        onChange={(e) => setTempBlurValue(e.target.value)} // ✅ Temporary update, no snap yet
+                                        onMouseUp={handleSliderRelease} // ✅ Snap added only when slider stops
+                                        onTouchEnd={handleSliderRelease} // ✅ Mobile support
+                                        disabled={!currentImage.history[currentImage.activeSnap].isBlur} // ✅ Disabled if isBlur is false
+                                        className="w-full h-2 rounded-lg bg-gray-300 dark:bg-blue-500 
+                                        appearance-none cursor-pointer 
+                                        disabled:opacity-50 disabled:cursor-not-allowed 
+                                        [&::-webkit-slider-thumb]:appearance-none 
+                                        [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 
+                                        [&::-webkit-slider-thumb]:bg-blue-500 
+                                        [&::-webkit-slider-thumb]:rounded-full 
+                                        [&::-webkit-slider-thumb]:transition-all 
+                                        [&::-webkit-slider-thumb]:hover:bg-blue-600 
+                                        [&::-webkit-slider-thumb]:active:scale-110"
+                                    />
+                                    <div>
+                                    </div>
+                                </div>) : null
+                            }
 
                         </div>
                     </div>
