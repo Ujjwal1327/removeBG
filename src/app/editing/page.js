@@ -1,18 +1,13 @@
 "use client";
 import { useImageContext } from "../../context/ImageContextProvider.jsx";
 import React, { useEffect, useState } from "react";
-import { MdDelete } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import Loadingtate from '../components/LoadingState.jsx'
 import { Stage, Layer, Image, Rect, Group } from "react-konva";
 import useRemoveBg from "../hooks/useRemoveBg";
-import { RiZoomOutLine } from "react-icons/ri";
 import useSampleImages from "../hooks/useSampleImage.js";
 import { useRouter } from "next/navigation";
-import { GoZoomIn, GoZoomOut } from "react-icons/go";
 import { MdOutlineCompare } from "react-icons/md";
-import { FaUndo } from "react-icons/fa";
-import { FaRedo } from "react-icons/fa";
 import { MdAdd, MdHeartBroken, MdAutoFixHigh } from "react-icons/md";
 import { RiSubtractLine } from "react-icons/ri";
 import { PiArrowBendUpLeftBold } from "react-icons/pi";
