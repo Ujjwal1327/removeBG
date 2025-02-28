@@ -24,6 +24,8 @@ import { IoBanOutline } from "react-icons/io5";
 const EditingPage = () => {
     const [color, setColor] = useState("#4F4F4F");
     const [showPicker, setShowPicker] = useState(false);
+    const [imageDimensions, setImageDimensions] = useState({ width: 400, height: 400 });
+
     const { images: sampleImages } = useSampleImages(20);
     const { images, activeImage, setActiveImage, deleteImage, addSnap, handleRedo, handleUndo } = useImageContext();
     const [loading, setLoading] = useState(false);
@@ -37,6 +39,10 @@ const EditingPage = () => {
 
     const [tempBlurValue, setTempBlurValue] = useState(0);
     const [tempOpacityValue, setTempOpacityValue] = useState(0);
+    const [scaledDimensions, setScaledDimensions] = useState({ width: 400, height: 400 });
+
+    const MAX_WIDTH = 400; // UI me Stage ka max width
+    const MAX_HEIGHT = 400; // UI me max height
     // ✅ Ensure `imageObj` is always defined
     const imageObj = images.find(img => img.id === activeImage) || { history: [], activeSnap: 0 };
     // ✅ Check if BG Removal is needed
@@ -51,15 +57,24 @@ const EditingPage = () => {
     }
     const handleDownload = () => {
         if (stageRef.current) {
-            const uri = stageRef.current.toDataURL(); // Stage ko image me convert karna
+            const uri = stageRef.current.toDataURL({
+                pixelRatio: 1,
+                width: imageDimensions.width,  // Original Width
+                height: imageDimensions.height, // Original Height
+                mimeType: "image/png",
+                quality: 1,
+            });
+
             const link = document.createElement("a");
             link.href = uri;
-            link.download = "konva-stage.png"; // File name
+            link.download = "edited-image.png";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
     };
+
+
     const handleCheckboxChange = (isChecked) => {
         addSnap({
             removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
@@ -177,6 +192,31 @@ const EditingPage = () => {
         // console.log(currentImage)
 
     }, [processedImageUrl]);
+
+
+
+    useEffect(() => {
+        if (activeImage) {
+            const img = new window.Image();
+            img.crossOrigin = "anonymous";
+            img.src = activeImage;
+
+            img.onload = () => {
+                const aspectRatio = img.width / img.height;
+                let newWidth = MAX_WIDTH;
+                let newHeight = MAX_WIDTH / aspectRatio;
+
+                if (newHeight > MAX_HEIGHT) {
+                    newHeight = MAX_HEIGHT;
+                    newWidth = MAX_HEIGHT * aspectRatio;
+                }
+
+                setImageDimensions({ width: img.width, height: img.height }); // Original Size
+                setScaledDimensions({ width: newWidth, height: newHeight }); // UI ke liye Proportionate Size
+            };
+        }
+    }, [activeImage]);
+
     //converting image for canvas
     useEffect(() => {
         if (!currentImage || !currentImage.history || !currentImage.history[currentImage.activeSnap]) return;
@@ -214,21 +254,28 @@ const EditingPage = () => {
                     <div className="flex w-full mb-10 gap-10 items-stretch justify-center  rounded-lg overflow-hidden">
                         {/*image left section*/}
                         <div className="flex-1 flex flex-col items-end">
-                            <Stage ref={stageRef} width={400} height={400} className="rounded-2xl shadow-xl border-1 border-gray-400 overflow-hidden">
-                                <Layer >
+
+                            <Stage
+                                ref={stageRef}
+                                width={scaledDimensions.width}
+                                height={scaledDimensions.height}
+                                className="rounded-2xl shadow-xl border-1 border-gray-400 overflow-hidden"
+                            
+                            ><Layer >
                                     {/* Transparent tru ho tab */}
                                     {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].transparent && (
                                         <Rect
-                                            width={400}
-                                            height={400}
+                                            width={imageDimensions.width}
+                                            height={imageDimensions.height}
+
                                             fillPatternImage={checkerboardPattern()}
                                         />
                                     )}
                                     {/* ✅bg me koi color selected ho tab */}
                                     {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].color && (
                                         <Rect
-                                            width={400}
-                                            height={400}
+                                            width={imageDimensions.width}
+                                            height={imageDimensions.height}
                                             fill={currentImage.history[currentImage.activeSnap].color}
                                         />
                                     )}
@@ -237,8 +284,9 @@ const EditingPage = () => {
                                         image={currentImage.history[currentImage.activeSnap].bgImage}
                                         filters={[Konva.Filters.Blur]} // Blur filter apply kar raha hai
                                         blurRadius={currentImage.history[currentImage.activeSnap].isBlur ? currentImage.history[currentImage.activeSnap].blurValue : 0} // Blur intensity
-                                        width={400}
-                                        height={400}
+                                        width={imageDimensions.width}
+                                        height={imageDimensions.height}
+
                                         ref={(node) => {
                                             if (node) {
                                                 node.cache(); // Filters ko properly apply karne ke liye
@@ -250,9 +298,12 @@ const EditingPage = () => {
                                     {konvaRemImage && <Image image={konvaRemImage} shadowColor="black"
                                         shadowBlur={20}
                                         shadowOffset={{ x: 15, y: 15 }}
-                                        shadowOpacity={currentImage.history[currentImage.activeSnap].isOpacity ? currentImage.history[currentImage.activeSnap].opacityValue : 0} width={400} height={400} />}
+                                        width={imageDimensions.width}
+                                        height={imageDimensions.height}
+                                        shadowOpacity={currentImage.history[currentImage.activeSnap].isOpacity ? currentImage.history[currentImage.activeSnap].opacityValue : 0}  />}
                                 </Layer>
                             </Stage>
+
                             {/* Buttons for Undo/Redo (Optional) */}
                             <div className="mt-5 flex gap-6 text-xl text-blackw-full items-center justify-end text-black">
                                 <button className="hover:scale-110" ><RiSubtractLine /></button>
@@ -308,9 +359,9 @@ const EditingPage = () => {
                                     </div>
                                     <hr className="h-[2px] bg-white" />
 
-                                    {   
+                                    {
                                         selectedPhoto == true ? (<div className="my-2 grid grid-cols-3 gap-2 overflow-auto max-h-[300px]" >
-                                            <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={()=>{
+                                            <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={() => {
                                                 addSnap({
                                                     removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
                                                     color: null,
@@ -322,7 +373,7 @@ const EditingPage = () => {
                                                     opacityValue: 0,
                                                 });
                                             }} >
-                                                    <IoBanOutline  className="text-black font-bold " />
+                                                <IoBanOutline className="text-black font-bold " />
                                             </div>
                                             {sampleImages.map((img, index) => (
                                                 <img
@@ -335,7 +386,7 @@ const EditingPage = () => {
                                             ))}
                                         </div>) : (<div className="p-2 grid grid-cols-3 gap-4 overflow-auto max-h-[300px]">
 
-                                            <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={()=>{
+                                            <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={() => {
                                                 addSnap({
                                                     removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
                                                     color: null,
@@ -347,7 +398,7 @@ const EditingPage = () => {
                                                     opacityValue: 0,
                                                 });
                                             }} >
-                                                    <IoBanOutline  className="text-black font-bold " />
+                                                <IoBanOutline className="text-black font-bold " />
                                             </div>
                                             <div
                                                 className="w-20 h-20 rounded-lg border-2"
