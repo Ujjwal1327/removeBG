@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { IoMdAdd } from "react-icons/io";
 import Loadingtate from '../components/LoadingState.jsx'
 import { Stage, Layer, Image, Rect, Group } from "react-konva";
-import useRemoveBg from "../hooks/useRemoveBg";
+import useRemoveBgAlt from "../hooks/useRemoveBgAlt";
 import useSampleImages from "../hooks/useSampleImage.js";
 import { useRouter } from "next/navigation";
 import { MdOutlineCompare } from "react-icons/md";
@@ -29,12 +29,13 @@ const EditingPage = () => {
     const stageRef = useRef(null); // Stage ka reference
 
     const [tempBlurValue, setTempBlurValue] = useState(0);
+    const [tempOpacityValue, setTempOpacityValue] = useState(0);
     // ✅ Ensure `imageObj` is always defined
     const imageObj = images.find(img => img.id === activeImage) || { history: [], activeSnap: 0 };
     // ✅ Check if BG Removal is needed
     const shouldRemoveBg = imageObj.history.length === 0 ? activeImage : null;
-    // ✅ Call `useRemoveBg()` only if needed
-    const { processedImageUrl, error, setError } = useRemoveBg(shouldRemoveBg, setLoading);
+    // ✅ Call `useRemoveBgAlt()` only if needed
+    const { processedImageUrl, error, setError } = useRemoveBgAlt(shouldRemoveBg, setLoading);
     const reduFun = () => {
         if (currentImage.activeSnap < currentImage.history.length - 1) {
             console.log("redu is calling")
@@ -60,7 +61,20 @@ const EditingPage = () => {
             blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
             bgImage: currentImage.history[currentImage.activeSnap].bgImage,
             transparent: currentImage.history[currentImage.activeSnap].transparent,
-            opacity: currentImage.history[currentImage.activeSnap].opacity,
+            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
+            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
+        });
+    };
+    const handleOpacityCheckboxChange = (isChecked) => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
+            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            isOpacity: isChecked,
+            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
         });
     };
     const handleSliderRelease = () => {
@@ -71,7 +85,20 @@ const EditingPage = () => {
             blurValue: Number(tempBlurValue), // ✅ Blur ka default value
             bgImage: currentImage.history[currentImage.activeSnap].bgImage,
             transparent: currentImage.history[currentImage.activeSnap].transparent,
-            opacity: currentImage.history[currentImage.activeSnap].opacity,
+            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
+            opacityValue:  currentImage.history[currentImage.activeSnap].opacityValue,
+        });
+    }
+    const handleOpacitySliderRelease = () => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
+            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            isOpacity:  currentImage.history[currentImage.activeSnap].isOpacity,
+            opacityValue: Number(tempOpacityValue),
         });
     }
     const handleImageClick = (imgSrc) => {
@@ -89,7 +116,8 @@ const EditingPage = () => {
                 blurValue: 0,
                 bgImage: imageObj, // ✅ Corrected Image URL
                 transparent: false,
-                opacity: null,
+                isOpacity: false,
+                opacityValue: 0,
 
             });
         };
@@ -134,7 +162,8 @@ const EditingPage = () => {
                 blurValue: 0,
                 bgImage: null,
                 transparent: true,
-                opacity: null,
+                isOpacity: false,
+                opacityValue: 0,
 
             });
         }
@@ -211,7 +240,10 @@ const EditingPage = () => {
                                         }}
                                     />}
                                     {/* ✅removed bg Image show karo top pe */}
-                                    {konvaRemImage && <Image image={konvaRemImage} width={400} height={400} />}
+                                    {konvaRemImage && <Image image={konvaRemImage} shadowColor="black"
+                                        shadowBlur={20}
+                                        shadowOffset={{ x: 15, y: 15 }}
+                                        shadowOpacity={currentImage.history[currentImage.activeSnap].isOpacity ? currentImage.history[currentImage.activeSnap].opacityValue : 0} width={400} height={400} />}
                                 </Layer>
                             </Stage>
                             {/* Buttons for Undo/Redo (Optional) */}
@@ -289,9 +321,8 @@ const EditingPage = () => {
                                                                 blurValue: 0,
                                                                 bgImage: null, // ✅ Corrected Image URL
                                                                 transparent: false,
-                                                                opacity: null,
-
-
+                                                                isOpacity: false,
+                                                                opacityValue: 0,
                                                             });
                                                         }}
                                                         style={{ backgroundColor: `${item}` }}
@@ -346,7 +377,6 @@ const EditingPage = () => {
 
                                     </div>
                                     <div className="my-4">
-
                                     </div>
                                     <label className="ml-2 text-lg font-medium text-gray-700"> Blur amount
                                     </label>
@@ -354,7 +384,7 @@ const EditingPage = () => {
                                         type="range"
                                         min="1"
                                         max="50"
-                                        value={currentImage.history[currentImage.activeSnap].blurValue}
+                                        value={currentImage.history[currentImage.activeSnap].blurValue || 0}
                                         onChange={(e) => setTempBlurValue(e.target.value)} // ✅ Temporary update, no snap yet
                                         onMouseUp={handleSliderRelease} // ✅ Snap added only when slider stops
                                         onTouchEnd={handleSliderRelease} // ✅ Mobile support
@@ -370,8 +400,50 @@ const EditingPage = () => {
                                         [&::-webkit-slider-thumb]:hover:bg-blue-600 
                                         [&::-webkit-slider-thumb]:active:scale-110"
                                     />
-                                    <div>
+                                    <div className="mb-10">
                                     </div>
+                                    <div>
+                                        <label className="flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={currentImage.history[currentImage.activeSnap].isOpacity}
+                                                onChange={(e) => handleOpacityCheckboxChange(e.target.checked)}
+                                            />
+
+                                            <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 relative transition-all duration-300">
+                                                <div className="w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-1 transition-all duration-300 peer-checked:left-6"></div>
+                                            </div>
+
+                                            <span className="ml-2 text-lg font-medium text-gray-700">Opacity Value</span>
+                                        </label>
+
+                                    </div>
+                                    <div className="my-4">
+                                    </div>
+                                    <label className="ml-2 text-lg font-medium text-gray-700"> Opacity amount
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.01"
+                                        value={currentImage.history[currentImage.activeSnap].opacityValue || 0}
+                                        onChange={(e) => setTempOpacityValue(e.target.value)} // ✅ Temporary update, no snap yet
+                                        onMouseUp={handleOpacitySliderRelease} // ✅ Snap added only when slider stops
+                                        onTouchEnd={handleOpacitySliderRelease} // ✅ Mobile support
+                                        disabled={!currentImage.history[currentImage.activeSnap].isOpacity} // ✅ Disabled if isBlur is false
+                                        className="w-full h-2 rounded-lg bg-gray-300 dark:bg-blue-500 
+                                        appearance-none cursor-pointer 
+                                        disabled:opacity-50 disabled:cursor-not-allowed 
+                                        [&::-webkit-slider-thumb]:appearance-none 
+                                        [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 
+                                        [&::-webkit-slider-thumb]:bg-blue-500 
+                                        [&::-webkit-slider-thumb]:rounded-full 
+                                        [&::-webkit-slider-thumb]:transition-all 
+                                        [&::-webkit-slider-thumb]:hover:bg-blue-600 
+                                        [&::-webkit-slider-thumb]:active:scale-110"
+                                    />
                                 </div>) : null
                             }
 

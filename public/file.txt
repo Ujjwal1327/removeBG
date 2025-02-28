@@ -1,5 +1,6 @@
 ujjwal.13h
  fetch random image from unsplash- access key - 6ipuoeJVIp-nRQBspNPd47VWWC9my6r9-8i98f2OT4g
+uzzwal.1327 - sample images - ud3F7ZumfeuLr5LnGM7OTGWNQ0dR6Ai5i7Ve8Mwuxe0
 
 
 uzzwal.1327
@@ -12,38 +13,6 @@ uzzwal.1327
 clodinary - 6yv4PxKDYGQtXf6HuzcP6nyh9nE
 ujjawal.13du api remove bg RCw7fooxLCZ6FPFmxrn3peEU
 
-uzzwal.1327 - sample images - ud3F7ZumfeuLr5LnGM7OTGWNQ0dR6Ai5i7Ve8Mwuxe0
 
 
-
-<div className="flex-1  grid grid-cols-2 gap-3 p-5 rounded-2xl">
-                            {
-                                currentImage && currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].removeBgUrl && sampleImages.map((img, index) => (
-                                    <img
-                                        key={index}
-                                        src={img}
-                                        alt={`Sample ${index + 1}`}
-                                        className="w-20 h-20 object-cover rounded-lg cursor-pointer border"
-                                        onClick={() => handleImageClick(img)}
-                                    />
-                                ))
-                            }
-                            {currentImage && currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].removeBgUrl && ["red", "blue", "yellow", "gray"].map((item, index) => (
-                                <div
-                                    onClick={() => {
-                                        addSnap({
-                                            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
-                                            color: item,
-                                            bgImage: null, // ✅ Corrected Image URL
-                                            transparent: false,
-                                            opacity: null,
-                                            blur: null,
-                                        });
-                                    }}
-                                    style={{ backgroundColor: `${item}` }}
-                                    className="w-20 h-20 rounded-lg border-2"
-                                    key={item + index}
-                                >
-                                </div>
-                            ))}
-                        </div>
+arjun-clipdrop- 783a6992b35422920447da7d032f9960656f9ec7994eda041d9f62eccdc7f79f733a5de4bba2df098b909011ae4188c8
