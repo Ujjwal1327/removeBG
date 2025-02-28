@@ -7,16 +7,23 @@ import { Stage, Layer, Image, Rect, Group } from "react-konva";
 import useRemoveBgAlt from "../hooks/useRemoveBgAlt";
 import useSampleImages from "../hooks/useSampleImage.js";
 import { useRouter } from "next/navigation";
-import { MdOutlineCompare } from "react-icons/md";
+import { MdCircle, MdOutlineCompare } from "react-icons/md";
 import { MdAdd, MdHeartBroken, MdAutoFixHigh } from "react-icons/md";
 import { RiSubtractLine } from "react-icons/ri";
 import { PiArrowBendUpLeftBold } from "react-icons/pi";
 import { PiArrowBendUpRightBold } from "react-icons/pi";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { useRef } from "react";
+import { SketchPicker } from "react-color";
+import { IoBanOutline } from "react-icons/io5";
+
+
+
 
 
 const EditingPage = () => {
+    const [color, setColor] = useState("#4F4F4F");
+    const [showPicker, setShowPicker] = useState(false);
     const { images: sampleImages } = useSampleImages(20);
     const { images, activeImage, setActiveImage, deleteImage, addSnap, handleRedo, handleUndo } = useImageContext();
     const [loading, setLoading] = useState(false);
@@ -86,7 +93,7 @@ const EditingPage = () => {
             bgImage: currentImage.history[currentImage.activeSnap].bgImage,
             transparent: currentImage.history[currentImage.activeSnap].transparent,
             isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
-            opacityValue:  currentImage.history[currentImage.activeSnap].opacityValue,
+            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
         });
     }
     const handleOpacitySliderRelease = () => {
@@ -97,7 +104,7 @@ const EditingPage = () => {
             blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
             bgImage: currentImage.history[currentImage.activeSnap].bgImage,
             transparent: currentImage.history[currentImage.activeSnap].transparent,
-            isOpacity:  currentImage.history[currentImage.activeSnap].isOpacity,
+            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
             opacityValue: Number(tempOpacityValue),
         });
     }
@@ -271,10 +278,13 @@ const EditingPage = () => {
                                 </span>
                             </div>
                             {
-                                isBgOn ? (<div className={`${isBgOn ? "block" : "hidden"} absolute top-0 left-0 shadow-2xl bg-gray-200 overflow-auto p-3 min-w-80 rounded-2xl`}>
+                                isBgOn ? (<div className={`${isBgOn ? "block" : "hidden"} absolute top-0 left-0 shadow-2xl bg-gray-200 overflow-auto p-3 min-w-80 min-h-96 rounded-2xl`}>
                                     <div onClick={() => {
                                         console.log("clicked in cut");
                                         setIsBgOn((prev) => {
+                                            return false;
+                                        });
+                                        setShowPicker((prev) => {
                                             return false;
                                         });
                                     }} className=" right-2 top-2 bg-black text-white text-2xl absolute rounded-full rotate-45 cursor-pointer">
@@ -295,11 +305,25 @@ const EditingPage = () => {
                                         >
                                             Color
                                         </span>
-
                                     </div>
                                     <hr className="h-[2px] bg-white" />
-                                    {
+
+                                    {   
                                         selectedPhoto == true ? (<div className="my-2 grid grid-cols-3 gap-2 overflow-auto max-h-[300px]" >
+                                            <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={()=>{
+                                                addSnap({
+                                                    removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                    color: null,
+                                                    isBlur: false,
+                                                    blurValue: 0,
+                                                    bgImage: null, // ✅ Corrected Image URL
+                                                    transparent: true,
+                                                    isOpacity: false,
+                                                    opacityValue: 0,
+                                                });
+                                            }} >
+                                                    <IoBanOutline  className="text-black font-bold " />
+                                            </div>
                                             {sampleImages.map((img, index) => (
                                                 <img
                                                     key={index}
@@ -310,6 +334,61 @@ const EditingPage = () => {
                                                 />
                                             ))}
                                         </div>) : (<div className="p-2 grid grid-cols-3 gap-4 overflow-auto max-h-[300px]">
+
+                                            <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={()=>{
+                                                addSnap({
+                                                    removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                    color: null,
+                                                    isBlur: false,
+                                                    blurValue: 0,
+                                                    bgImage: null, // ✅ Corrected Image URL
+                                                    transparent: true,
+                                                    isOpacity: false,
+                                                    opacityValue: 0,
+                                                });
+                                            }} >
+                                                    <IoBanOutline  className="text-black font-bold " />
+                                            </div>
+                                            <div
+                                                className="w-20 h-20 rounded-lg border-2"
+                                                style={{
+                                                    background: "conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
+                                                }} onClick={() => setShowPicker(!showPicker)}
+                                            ></div>
+                                            {showPicker && (
+                                                <div className="absolute top-12 right-0 z-50 shadow-lg text-black bg-white border-2 rounded-lg">
+                                                    <div onClick={() => {
+                                                        console.log("clicked on cut");
+                                                        setShowPicker((prev) => {
+                                                            return false;
+                                                        });
+                                                    }} className=" right-2 top-2 z-20 bg-black text-white text-2xl absolute rounded-full rotate-45 cursor-pointer">
+                                                        <MdAdd />
+                                                    </div>
+                                                    <div className="m-10">
+                                                    </div>
+                                                    <SketchPicker
+
+                                                        color={color}
+                                                        onChangeComplete={(updatedColor) => {
+                                                            setColor(updatedColor.hex)
+                                                            addSnap({
+                                                                removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                                color: updatedColor.hex,
+                                                                isBlur: false,
+                                                                blurValue: 0,
+                                                                bgImage: null, // ✅ Corrected Image URL
+                                                                transparent: false,
+                                                                isOpacity: false,
+                                                                opacityValue: 0,
+                                                            });
+
+                                                        }}
+
+
+                                                    />
+                                                </div>
+                                            )}
                                             {
                                                 ["red", "blue", "yellow", "gray"].map((item, index) => (
                                                     <div
