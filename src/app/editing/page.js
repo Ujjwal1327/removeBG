@@ -264,24 +264,7 @@ const EditingPage = () => {
                                 scaleX={scale} // Applying scale
                                 scaleY={scale}
                             ><Layer >
-                                    {/* origional image at bg */}
-                                    {currentImage && currentImage.id && currentImage.history && currentImage.history[currentImage.activeSnap] && (
-                                        <Image
-                                            image={(() => {
-                                                const img = new window.Image();
-                                                img.src = currentImage.id; // Ensure this is a valid URL
-                                                return img;
-                                            })()}
-                                            width={imageDimensions.width}
-                                            height={imageDimensions.height}
-                                            ref={(node) => {
-                                                if (node) {
-                                                    node.cache(); // Apply filters correctly
-                                                    node.getLayer().batchDraw(); // Update the canvas
-                                                }
-                                            }}
-                                        />
-                                    )}
+                                    
 
                                     {/* Transparent tru ho tab */}
                                     {compare && currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].transparent && (
@@ -350,7 +333,7 @@ const EditingPage = () => {
                                 }} >
                                 
                                 {
-                                    compare ? <IoIosGitCompare /> :<IoMdGitCompare />
+                                    compare ? <IoIosGitCompare/> :<IoMdGitCompare  />
                                 }
                                 </button>
                                 {

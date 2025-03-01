@@ -38,6 +38,7 @@ const Page = () => {
   }, []);
   return (
     <div className="flex items-stretch bg-white justify-center gap-12">
+    
       <div className="overflow-hidden ">
         <video ref={videoRef} src="/video.mp4" className="rounded-3xl mb-5 object-cover" height={400} width={400} muted autoPlay playsInline></video>
         <h1 className="text-[60px] text-gray-600 font-bold leading-[1]">
