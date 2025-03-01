@@ -1,7 +1,7 @@
 "use client";
 import { useImageContext } from "../../context/ImageContextProvider.jsx";
 import React, { useEffect, useState } from "react";
-import { IoMdAdd } from "react-icons/io";
+import { IoIosGitCompare, IoMdAdd, IoMdGitCompare } from "react-icons/io";
 import Loadingtate from '../components/LoadingState.jsx'
 import { Stage, Layer, Image, Rect, Group } from "react-konva";
 import useRemoveBgAlt from "../hooks/useRemoveBgAlt";
@@ -22,6 +22,7 @@ import { IoBanOutline } from "react-icons/io5";
 
 
 const EditingPage = () => {
+    const [scale, setScale] = useState(1); // Default scale 1 (Normal)
     const [color, setColor] = useState("#4F4F4F");
     const [showPicker, setShowPicker] = useState(false);
     const [imageDimensions, setImageDimensions] = useState({ width: 400, height: 400 });
@@ -36,7 +37,7 @@ const EditingPage = () => {
     const [konvaRemImage, setKonvaRemImage] = useState(null);
     const router = useRouter();
     const stageRef = useRef(null); // Stage ka reference
-
+    const [compare, setCompare] = useState(true);
     const [tempBlurValue, setTempBlurValue] = useState(0);
     const [tempOpacityValue, setTempOpacityValue] = useState(0);
     const [scaledDimensions, setScaledDimensions] = useState({ width: 400, height: 400 });
@@ -237,10 +238,11 @@ const EditingPage = () => {
     }, [isBgOn]);
     console.log(images)
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="w-full relative flex flex-col items-center justify-center min-h-screen bg-white">
             {
                 loading && (
-                    <Loadingtate />
+                    <Loadingtate width={scaledDimensions.width}
+                        height={scaledDimensions.height} />
                 )
             }
             {error && (
@@ -254,25 +256,43 @@ const EditingPage = () => {
                     <div className="flex w-full mb-10 gap-10 items-stretch justify-center  rounded-lg overflow-hidden">
                         {/*image left section*/}
                         <div className="flex-1 flex flex-col items-end">
-
                             <Stage
                                 ref={stageRef}
                                 width={scaledDimensions.width}
                                 height={scaledDimensions.height}
                                 className="rounded-2xl shadow-xl border-1 border-gray-400 overflow-hidden"
-                            
+                                scaleX={scale} // Applying scale
+                                scaleY={scale}
                             ><Layer >
+                                    {/* origional image at bg */}
+                                    {currentImage && currentImage.id && currentImage.history && currentImage.history[currentImage.activeSnap] && (
+                                        <Image
+                                            image={(() => {
+                                                const img = new window.Image();
+                                                img.src = currentImage.id; // Ensure this is a valid URL
+                                                return img;
+                                            })()}
+                                            width={imageDimensions.width}
+                                            height={imageDimensions.height}
+                                            ref={(node) => {
+                                                if (node) {
+                                                    node.cache(); // Apply filters correctly
+                                                    node.getLayer().batchDraw(); // Update the canvas
+                                                }
+                                            }}
+                                        />
+                                    )}
+
                                     {/* Transparent tru ho tab */}
-                                    {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].transparent && (
+                                    {compare && currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].transparent && (
                                         <Rect
                                             width={imageDimensions.width}
                                             height={imageDimensions.height}
-
                                             fillPatternImage={checkerboardPattern()}
                                         />
                                     )}
                                     {/* ✅bg me koi color selected ho tab */}
-                                    {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].color && (
+                                    {compare && currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].color && (
                                         <Rect
                                             width={imageDimensions.width}
                                             height={imageDimensions.height}
@@ -280,7 +300,7 @@ const EditingPage = () => {
                                         />
                                     )}
                                     {/*  background me koi image save ho tab */}
-                                    {currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].bgImage && <Image
+                                    {compare && currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].bgImage && <Image
                                         image={currentImage.history[currentImage.activeSnap].bgImage}
                                         filters={[Konva.Filters.Blur]} // Blur filter apply kar raha hai
                                         blurRadius={currentImage.history[currentImage.activeSnap].isBlur ? currentImage.history[currentImage.activeSnap].blurValue : 0} // Blur intensity
@@ -300,15 +320,39 @@ const EditingPage = () => {
                                         shadowOffset={{ x: 15, y: 15 }}
                                         width={imageDimensions.width}
                                         height={imageDimensions.height}
-                                        shadowOpacity={currentImage.history[currentImage.activeSnap].isOpacity ? currentImage.history[currentImage.activeSnap].opacityValue : 0}  />}
+                                        shadowOpacity={currentImage.history[currentImage.activeSnap].isOpacity ? currentImage.history[currentImage.activeSnap].opacityValue : 0} />}
                                 </Layer>
                             </Stage>
 
                             {/* Buttons for Undo/Redo (Optional) */}
                             <div className="mt-5 flex gap-6 text-xl text-blackw-full items-center justify-end text-black">
-                                <button className="hover:scale-110" ><RiSubtractLine /></button>
-                                <button className="hover:scale-110" ><MdAdd /></button>
-                                <button className="hover:scale-110" ><MdOutlineCompare /></button>
+                                <button
+                                    className={`hover:scale-110 ${scale <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    onClick={() => {
+                                        setScale((prevScale) => (prevScale > 1 ? prevScale - 0.1 : 1));
+                                    }}
+                                    disabled={scale <= 1} // Button disable kar diya
+                                >
+                                    <RiSubtractLine />
+                                </button>
+                                <button
+                                    className={`hover:scale-110 ${scale >= 2 ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    onClick={() => {
+                                        setScale((prevScale) => Math.min(prevScale + 0.1, 2)); // Max zoom level 3
+                                    }}
+                                    disabled={scale >= 2} // Button disable jab max zoom ho
+                                >
+                                    <MdAdd />
+                                </button>
+
+                                <button className="hover:scale-110" onClick={() => {
+                                    setCompare((prev) => !prev)
+                                }} >
+                                
+                                {
+                                    compare ? <IoIosGitCompare /> :<IoMdGitCompare />
+                                }
+                                </button>
                                 {
                                     currentImage.activeSnap == 0 ? (<button className=" text-gray-500 cursor-not-allowed" onClick={undoFun}><PiArrowBendUpLeftBold /></button>) : (<button className="hover:scale-110 text-black" onClick={undoFun}><PiArrowBendUpLeftBold /></button>)
                                 }
@@ -441,26 +485,28 @@ const EditingPage = () => {
                                                 </div>
                                             )}
                                             {
-                                                ["red", "blue", "yellow", "gray"].map((item, index) => (
-                                                    <div
-                                                        onClick={() => {
-                                                            addSnap({
-                                                                removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
-                                                                color: item,
-                                                                isBlur: false,
-                                                                blurValue: 0,
-                                                                bgImage: null, // ✅ Corrected Image URL
-                                                                transparent: false,
-                                                                isOpacity: false,
-                                                                opacityValue: 0,
-                                                            });
-                                                        }}
-                                                        style={{ backgroundColor: `${item}` }}
-                                                        className="w-20 h-20 rounded-lg border-2"
-                                                        key={item + index}
-                                                    >
-                                                    </div>
-                                                ))
+                                                ["green", "orange", "pink", "brown", "white", "red", "blue", "yellow", "gray",
+                                                    "purple", "cyan", "magenta", "lime", "teal", "maroon", "navy", "olive", "gold", "silver", "indigo", "violet"]
+                                                    .map((item, index) => (
+                                                        <div
+                                                            onClick={() => {
+                                                                addSnap({
+                                                                    removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                                    color: item,
+                                                                    isBlur: false,
+                                                                    blurValue: 0,
+                                                                    bgImage: null, // ✅ Corrected Image URL
+                                                                    transparent: false,
+                                                                    isOpacity: false,
+                                                                    opacityValue: 0,
+                                                                });
+                                                            }}
+                                                            style={{ backgroundColor: `${item}` }}
+                                                            className="w-20 h-20 rounded-lg border-2"
+                                                            key={item + index}
+                                                        >
+                                                        </div>
+                                                    ))
                                             }
 
                                         </div>)
@@ -580,7 +626,7 @@ const EditingPage = () => {
                         </div>
                     </div>
                     {/*footer  section*/}
-                    <div className="w-full h-20 flex items-end justify-between gap-3 px-10 ">
+                    <div className="w-full h-20 flex items-end justify-between gap-3 px-10 absolute bottom-5">
                         <div className="flex items-center justify-center gap-3">
                             <button className="text-2xl text-blue-500 p-4 rounded-lg bg-blue-100" onClick={() => {
                                 router.push("/")
