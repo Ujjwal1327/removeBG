@@ -15,7 +15,7 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { useRef } from "react";
 import { SketchPicker } from "react-color";
 import { IoBanOutline, IoDownload } from "react-icons/io5";
-import { checkerboardPattern, reduFun, handleDownload, handleCheckboxChange, handleOpacityCheckboxChange, handleSliderRelease, handleOpacitySliderRelease, handleImageClick, undoFun } from "../../utils/functions.js"
+// import { checkerboardPattern, reduFun, handleDownload, handleCheckboxChange, handleOpacityCheckboxChange, handleSliderRelease, handleOpacitySliderRelease, handleImageClick, undoFun } from "../../utils/functions.js"
 import { FaArrowDown } from "react-icons/fa6";
 
 
@@ -51,6 +51,134 @@ const EditingPage = () => {
     const { processedImageUrl, error, setError } = useRemoveBgAlt(shouldRemoveBg, setLoading);
 
 
+    const checkerboardPattern = () => {
+
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 20;
+        canvas.height = 20;
+        const ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "#ddd";
+        ctx.fillRect(0, 0, 20, 20);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, 10, 10);
+        ctx.fillRect(10, 10, 10, 10);
+
+        // ✅ Convert canvas to Image
+        const img = new window.Image();
+        img.crossOrigin = "anonymous";
+        img.src = canvas.toDataURL();  // Convert canvas to data URL
+        return img;
+    };
+
+
+    const reduFun = () => {
+        if (currentImage.activeSnap < currentImage.history.length - 1) {
+            console.log("redu is calling")
+            handleRedo()
+        }
+    }
+    const handleDownload = () => {
+        if (stageRef.current) {
+            const uri = stageRef.current.toDataURL({
+                pixelRatio: 1,
+                width: imageDimensions.width,  // Original Width
+                height: imageDimensions.height, // Original Height
+                mimeType: "image/png",
+                quality: 1,
+            });
+
+            const link = document.createElement("a");
+            link.href = uri;
+            link.download = "edited-image.png";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+
+    const handleCheckboxChange = (isChecked) => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: isChecked, // ✅ Checkbox ka value
+            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
+            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
+        });
+    };
+    const handleOpacityCheckboxChange = (isChecked) => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
+            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            isOpacity: isChecked,
+            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
+        });
+    };
+    const handleSliderRelease = () => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
+            blurValue: Number(tempBlurValue), // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
+            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
+        });
+    }
+    const handleOpacitySliderRelease = () => {
+        addSnap({
+            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+            color: currentImage.history[currentImage.activeSnap].color, // Current color
+            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
+            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
+            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
+            transparent: currentImage.history[currentImage.activeSnap].transparent,
+            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
+            opacityValue: Number(tempOpacityValue),
+        });
+    }
+    const handleImageClick = (imgSrc) => {
+        const imageObj = new window.Image();
+        imageObj.crossOrigin = "Anonymous"; // CORS issue avoid करने के लिए
+        imageObj.src = imgSrc;
+
+        imageObj.onload = () => {
+
+            // Send to addSnap with Valid URL
+            addSnap({
+                removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                color: null,
+                isBlur: false,
+                blurValue: 0,
+                bgImage: imageObj, // ✅ Corrected Image URL
+                transparent: false,
+                isOpacity: false,
+                opacityValue: 0,
+
+            });
+        };
+
+        imageObj.onerror = (error) => {
+            console.error("Failed to load image:", imgSrc, error);
+        };
+    };
+    const undoFun = () => {
+        if (currentImage.activeSnap > 0) {
+            console.log("undo is calling")
+            handleUndo()
+
+        }
+    }
 
     // ✅ Add  Removed Background Image to History
     useEffect(() => {
@@ -127,9 +255,8 @@ const EditingPage = () => {
                     </button>
                     <div className="flex gap-3">
                         {
-
                             images.map((img, index) => (
-                                <div className="relative">
+                                <div key={index + "a"} className="relative">
                                     <img
                                         key={index}
                                         src={img.id}
@@ -139,7 +266,7 @@ const EditingPage = () => {
                                     {
                                         activeImage === img.id &&
 
-                                        (<div className="w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full absolute -top-3 -right-3 text-white">
+                                        (<div key={index + "i"} className="w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full absolute -top-3 -right-3 text-white">
                                             <RiDeleteBin5Line className="cursor-pointer" onClick={() => {
                                                 setError(null)
                                                 deleteImage(activeImage)
@@ -150,7 +277,6 @@ const EditingPage = () => {
                                 </div>
 
                             ))
-
                         }
                     </div>
                 </div>
@@ -243,7 +369,7 @@ const EditingPage = () => {
                             </Stage>
 
                             {/* Buttons for Undo/Redo (Optional) */}
-                            <div className="mt-5 flex flex-wrap gap-8 lg:gap-6 text-xl px-3 lg:px-0 text-blackw-full items-center  justify-between  lg:justify-end text-black" style={{ width: scaledDimensions.width }}>
+                            <div className="mt-5 flex flex-wrap gap-8 lg:gap-6 text-xl px-3 lg:px-0 text-blackw-full items-center  justify-around  lg:justify-end text-black" style={{ width: scaledDimensions.width }}>
                                 <button
                                     className={`hover:scale-110 ${scale <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
                                     onClick={() => {
@@ -283,11 +409,14 @@ const EditingPage = () => {
                         {/*responsive section*/}
                         <div className=" w-full flex-1 lg:hidden">
                             <div className="w-10/12 mx-auto flex flex-row items-start justify-around">
-                                <div className="flex items-center flex-col justify-center gap-2">
+                                <div className="flex items-center flex-col justify-center gap-2" onClick={() => {
+                                    console.log("hello click download")
+                                    handleDownload()
+                                }}>
                                     <div className="w-10 h-10 rounded-full border-2 border-blue-600 bg-blue-600 flex items-center justify-center">
                                         <FaArrowDown className="text-white text-2xl" />
                                     </div>
-                                    <span className="text-xs italic" onClick={handleDownload}>Download</span>
+                                    <span className="text-xs italic" >Download</span>
                                 </div>
                                 <div className="flex items-center flex-col justify-center gap-2" onClick={() => setIsBgOn(true)}>
                                     <div className="w-10 h-10 rounded-full border-2 border-blue-600 bg-white flex items-center justify-center">
@@ -452,12 +581,111 @@ const EditingPage = () => {
                                         }
                                     </div>) : null
                                 }
-                                <div className="flex items-center flex-col justify-center gap-2">
+                                <div className="flex items-center flex-col justify-center gap-2" onClick={() => setIsMetrics(true)}>
                                     <div className="w-10 h-10 rounded-full border-2 border-blue-600 bg-blue-600 flex items-center justify-center">
                                         <MdAutoFixHigh className="text-white text-2xl" />
                                     </div>
                                     <span className="text-xs italic">Effects</span>
                                 </div>
+                                {
+                                    isMetrics && currentImage ? (<div className={`${isMetrics ? "block" : "hidden"} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-2xl bg-gray-200 overflow-auto p-3 px-6 min-w-80  min-h-64 rounded-2xl`}>
+
+                                        <div onClick={() => {
+                                            console.log("clicked on cut");
+                                            setIsMetrics((prev) => {
+                                                return false;
+                                            });
+                                        }} className=" right-2 top-2 bg-black text-white text-2xl absolute rounded-full rotate-45 cursor-pointer">
+                                            <MdAdd />
+                                        </div>
+                                        <div className="mb-10">
+
+                                        </div>
+                                        <div>
+                                            <label className="flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="sr-only peer"
+                                                    checked={currentImage.history[currentImage.activeSnap].isBlur}
+                                                    onChange={(e) => handleCheckboxChange(e.target.checked)}
+                                                />
+                                                <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 relative transition-all duration-300">
+                                                    <div className="w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-1 transition-all duration-300 peer-checked:left-6"></div>
+                                                </div>
+
+                                                <span className="ml-2 text-lg font-medium text-gray-700">Blur background</span>
+                                            </label>
+
+                                        </div>
+                                        <div className="my-4">
+                                        </div>
+                                        <label className="ml-2 text-lg font-medium text-gray-700"> Blur amount
+                                        </label>
+                                        <input type="range"
+                                            min="1"
+                                            max="50"
+                                            value={currentImage.history[currentImage.activeSnap].blurValue || 0}
+                                            onChange={(e) => setTempBlurValue(e.target.value)} // ✅ Temporary update, no snap yet
+                                            onMouseUp={handleSliderRelease} // ✅ Snap added only when slider stops
+                                            onTouchEnd={handleSliderRelease} // ✅ Mobile support
+                                            disabled={!currentImage.history[currentImage.activeSnap].isBlur} // ✅ Disabled if isBlur is false
+                                            className="w-full h-2 rounded-lg bg-gray-300 dark:bg-blue-500 
+                                            appearance-none cursor-pointer 
+                                            disabled:opacity-50 disabled:cursor-not-allowed 
+                                            [&::-webkit-slider-thumb]:appearance-none 
+                                            [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 
+                                            [&::-webkit-slider-thumb]:bg-blue-500 
+                                            [&::-webkit-slider-thumb]:rounded-full 
+                                            [&::-webkit-slider-thumb]:transition-all 
+                                            [&::-webkit-slider-thumb]:hover:bg-blue-600 
+                                            [&::-webkit-slider-thumb]:active:scale-110"
+                                        />
+                                        <div className="mb-10">
+                                        </div>
+                                        <div>
+                                            <label className="flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="sr-only peer"
+                                                    checked={currentImage.history[currentImage.activeSnap].isOpacity}
+                                                    onChange={(e) => handleOpacityCheckboxChange(e.target.checked)}
+                                                />
+
+                                                <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-500 relative transition-all duration-300">
+                                                    <div className="w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-1 transition-all duration-300 peer-checked:left-6"></div>
+                                                </div>
+
+                                                <span className="ml-2 text-lg font-medium text-gray-700">Opacity Value</span>
+                                            </label>
+
+                                        </div>
+                                        <div className="my-4">
+                                        </div>
+                                        <label className="ml-2 text-lg font-medium text-gray-700"> Opacity amount
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.01"
+                                            value={currentImage.history[currentImage.activeSnap].opacityValue || 0}
+                                            onChange={(e) => setTempOpacityValue(e.target.value)} // ✅ Temporary update, no snap yet
+                                            onMouseUp={handleOpacitySliderRelease} // ✅ Snap added only when slider stops
+                                            onTouchEnd={handleOpacitySliderRelease} // ✅ Mobile support
+                                            disabled={!currentImage.history[currentImage.activeSnap].isOpacity} // ✅ Disabled if isBlur is false
+                                            className="w-full h-2 rounded-lg bg-gray-300 dark:bg-blue-500 
+                                            appearance-none cursor-pointer 
+                                            disabled:opacity-50 disabled:cursor-not-allowed 
+                                            [&::-webkit-slider-thumb]:appearance-none 
+                                            [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 
+                                            [&::-webkit-slider-thumb]:bg-blue-500 
+                                            [&::-webkit-slider-thumb]:rounded-full 
+                                            [&::-webkit-slider-thumb]:transition-all 
+                                            [&::-webkit-slider-thumb]:hover:bg-blue-600 
+                                            [&::-webkit-slider-thumb]:active:scale-110"
+                                        />
+                                    </div>) : null
+                                }
                             </div>
                         </div>
                         {/*image right section*/}

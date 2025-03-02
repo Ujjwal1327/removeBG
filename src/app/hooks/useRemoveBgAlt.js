@@ -29,7 +29,7 @@ const useRemoveBgAlt = (imageUrl, setLoading) => {
             const res = await fetch("https://clipdrop-api.co/remove-background/v1", {
                 method: "POST",
                 headers: {
-                    "x-api-key": "f6e513d29b18b4429f6beb22b5b8edf7828e0a69b37e0d1b3b342001a8d7fd79c12d3c7d404dba08d84a8d6dbadf6c66", // ✅ ClipDrop API Key
+                    "x-api-key": "89e3c776ec012f8af6bde5b788f151d18cafbafc0c98b570efad0c4645987df086cff5fbf495c6e63ef32d5628dceb46", // ✅ ClipDrop API Key
                 },
                 body: formData,
             });

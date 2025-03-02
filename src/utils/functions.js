@@ -1,4 +1,10 @@
+import { useImageContext } from "../context/ImageContextProvider";
+
+const { images, activeImage, setActiveImage, deleteImage, addSnap, handleRedo, handleUndo } = useImageContext();
+
 export const checkerboardPattern = () => {
+
+
     const canvas = document.createElement("canvas");
     canvas.width = 20;
     canvas.height = 20;
