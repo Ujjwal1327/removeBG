@@ -7,15 +7,16 @@ import { Stage, Layer, Image, Rect, Group } from "react-konva";
 import useRemoveBgAlt from "../hooks/useRemoveBgAlt";
 import useSampleImages from "../hooks/useSampleImage.js";
 import { useRouter } from "next/navigation";
-import { MdAdd, MdHeartBroken, MdAutoFixHigh } from "react-icons/md";
+import { MdAdd, MdHeartBroken, MdAutoFixHigh, MdDownload } from "react-icons/md";
 import { RiSubtractLine } from "react-icons/ri";
 import { PiArrowBendUpLeftBold } from "react-icons/pi";
 import { PiArrowBendUpRightBold } from "react-icons/pi";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { useRef } from "react";
 import { SketchPicker } from "react-color";
-import { IoBanOutline } from "react-icons/io5";
+import { IoBanOutline, IoDownload } from "react-icons/io5";
 import { checkerboardPattern, reduFun, handleDownload, handleCheckboxChange, handleOpacityCheckboxChange, handleSliderRelease, handleOpacitySliderRelease, handleImageClick, undoFun } from "../../utils/functions.js"
+import { FaArrowDown } from "react-icons/fa6";
 
 
 
@@ -110,29 +111,64 @@ const EditingPage = () => {
     }, [isBgOn]);
     console.log(images)
     return (
-        <div className="w-full relative flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className=" w-full relative flex gap-2 flex-col items-center justify-center min-h-screen bg-white pt-5">
             {
                 loading && (
                     <Loadingtate width={scaledDimensions.width}
                         height={scaledDimensions.height} />
                 )
             }
-            {error && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-100 border border-red-400 text-red-700">
-                    ❌ <span>{error}</span>
+            <div className="block lg:hidden w-full">
+                <div className="flex items-center justify-start w-10/12 mx-auto   gap-3">
+                    <button className="text-2xl text-blue-500 p-4 rounded-lg bg-blue-100" onClick={() => {
+                        router.push("/")
+                    }}>
+                        <IoMdAdd />
+                    </button>
+                    <div className="flex gap-3">
+                        {
+
+                            images.map((img, index) => (
+                                <div className="relative">
+                                    <img
+                                        key={index}
+                                        src={img.id}
+                                        className={`w-14 cursor-pointer h-14 rounded-lg border-2 ${activeImage === img.id ? "border-blue-500" : "border-transparent"}`}
+                                        onClick={() => setActiveImage(img.id)}
+                                    />
+                                    {
+                                        activeImage === img.id &&
+
+                                        (<div className="w-8 h-8 flex items-center justify-center bg-blue-600 rounded-full absolute -top-3 -right-3 text-white">
+                                            <RiDeleteBin5Line className="cursor-pointer" onClick={() => {
+                                                setError(null)
+                                                deleteImage(activeImage)
+                                            }
+                                            } />
+                                        </div>)
+                                    }
+                                </div>
+
+                            ))
+
+                        }
+                    </div>
                 </div>
-            )}
+            </div>
+            {error && <p className="absolute top-1 lg:top-10 bg-gray-500 px-3 py-1 w-[96%] text-white right-[2%] text-lg font-bold">{error}
+                <MdAdd onClick={() => setError(null)} className="absolute top-1 right-1 bg-white rotate-45 text-lg text-gray-600 font-bold  rounded-full" />
+            </p>}
             {!loading && currentImage.history && (
                 <div className="w-full h-full bg-white">
                     {/*image section*/}
-                    <div className="flex w-full mb-10 gap-10 items-stretch justify-center  rounded-lg overflow-hidden">
+                    <div className=" min-w-96 px-10  items-center flex flex-col lg:flex-row w-full mb-10 gap-10 lg:items-stretch justify-center  rounded-lg">
                         {/*image left section*/}
-                        <div className="flex-1 flex flex-col items-end">
+                        <div className="flex-1 flex flex-col items-end ">
                             <Stage
                                 ref={stageRef}
                                 width={scaledDimensions.width}
                                 height={scaledDimensions.height}
-                                className="rounded-2xl shadow-xl border-1 border-gray-400 overflow-hidden"
+                                className="rounded-2xl shadow-2xl min-w-40   overflow-hidden"
                                 scaleX={scale} // Applying scale
                                 scaleY={scale}
                             ><Layer >
@@ -207,7 +243,7 @@ const EditingPage = () => {
                             </Stage>
 
                             {/* Buttons for Undo/Redo (Optional) */}
-                            <div className="mt-5 flex gap-6 text-xl text-blackw-full items-center justify-end text-black">
+                            <div className="mt-5 flex flex-wrap gap-8 lg:gap-6 text-xl px-3 lg:px-0 text-blackw-full items-center  justify-between  lg:justify-end text-black" style={{ width: scaledDimensions.width }}>
                                 <button
                                     className={`hover:scale-110 ${scale <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
                                     onClick={() => {
@@ -241,11 +277,191 @@ const EditingPage = () => {
                                 {
                                     currentImage.activeSnap == currentImage.history.length - 1 ? (<button className="text-gray-500 cursor-not-allowed" onClick={reduFun} ><PiArrowBendUpRightBold /></button>) : (<button className="hover:scale-110 text-black" onClick={reduFun} ><PiArrowBendUpRightBold /></button>)
                                 }
-                                <button onClick={handleDownload} className="hover:bg-blue-600 py-1 px-8 rounded-3xl text-nowrap bg-blue-500 text-white">Download </button>
+                                <button onClick={handleDownload} className="hover:bg-blue-600 hidden lg:block py-1 px-8 rounded-3xl text-nowrap bg-blue-500 text-white">Download </button>
+                            </div>
+                        </div>
+                        {/*responsive section*/}
+                        <div className=" w-full flex-1 lg:hidden">
+                            <div className="w-10/12 mx-auto flex flex-row items-start justify-around">
+                                <div className="flex items-center flex-col justify-center gap-2">
+                                    <div className="w-10 h-10 rounded-full border-2 border-blue-600 bg-blue-600 flex items-center justify-center">
+                                        <FaArrowDown className="text-white text-2xl" />
+                                    </div>
+                                    <span className="text-xs italic" onClick={handleDownload}>Download</span>
+                                </div>
+                                <div className="flex items-center flex-col justify-center gap-2" onClick={() => setIsBgOn(true)}>
+                                    <div className="w-10 h-10 rounded-full border-2 border-blue-600 bg-white flex items-center justify-center">
+                                        <MdAdd className="text-blue-600 text-2xl" />
+                                    </div>
+                                    <span className="text-xs italic">Background</span>
+                                </div>
+                                {
+                                    isBgOn ? (<div className={`${isBgOn ? "block" : "hidden"} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-2xl bg-gray-200 overflow-auto p-3 min-w-80 min-h-96 rounded-2xl`}>
+                                        <div onClick={() => {
+                                            console.log("clicked in cut");
+                                            setIsBgOn((prev) => {
+                                                return false;
+                                            });
+                                            setShowPicker((prev) => {
+                                                return false;
+                                            });
+                                        }} className=" right-2 top-2 bg-black text-white text-2xl absolute rounded-full rotate-45 cursor-pointer">
+                                            <MdAdd />
+                                        </div>
+                                        <div className="flex gap-3 items-center justify-start my-2">
+                                            <span
+                                                className={`px-5 text-gray-600 text-md py-1 rounded-xl cursor-pointer ${selectedPhoto ? "bg-white" : "bg-transparent"
+                                                    }`}
+                                                onClick={() => setSelectedPhoto(true)}
+                                            >
+                                                Photo
+                                            </span>
+                                            <span
+                                                className={`px-5 text-gray-600 text-md py-1 rounded-xl cursor-pointer ${!selectedPhoto ? "bg-white" : "bg-transparent"
+                                                    }`}
+                                                onClick={() => setSelectedPhoto(false)}
+                                            >
+                                                Color
+                                            </span>
+                                        </div>
+                                        <hr className="h-[2px] bg-white" />
+
+                                        {
+                                            selectedPhoto == true ? (<div className="my-2 grid grid-cols-3 gap-2 overflow-auto max-h-[300px]" >
+                                                <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={() => {
+                                                    addSnap({
+                                                        removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                        color: null,
+                                                        isBlur: false,
+                                                        blurValue: 0,
+                                                        bgImage: null,
+                                                        transparent: true,
+                                                        isOpacity: false,
+                                                        opacityValue: 0,
+                                                    });
+                                                }} >
+                                                    <IoBanOutline className="text-black font-bold " />
+                                                </div>
+                                                {sampleImages.map((img, index) => (
+                                                    <img
+                                                        key={index}
+                                                        src={img}
+                                                        alt={`Sample ${index + 1}`}
+                                                        className="w-20 h-20 object-cover rounded-lg cursor-pointer border"
+                                                        onClick={() => {
+                                                            handleImageClick(img)
+                                                            setIsBgOn(false)
+                                                        }
+
+
+
+                                                        }
+
+
+                                                    />
+                                                ))}
+                                            </div>) : (<div className="p-2 grid grid-cols-3 gap-4 overflow-auto max-h-[300px]">
+
+                                                <div className="cursor-pointer flex items-center justify-center w-20 h-20 rounded-lg border-2 bg-white border-gray-300" onClick={() => {
+                                                    addSnap({
+                                                        removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                        color: null,
+                                                        isBlur: false,
+                                                        blurValue: 0,
+                                                        bgImage: null, // ✅ Corrected Image URL
+                                                        transparent: true,
+                                                        isOpacity: false,
+                                                        opacityValue: 0,
+                                                    });
+                                                }} >
+                                                    <IoBanOutline className="text-black font-bold " />
+                                                </div>
+                                                <div
+                                                    className="w-20 h-20 rounded-lg border-2"
+                                                    style={{
+                                                        background: "conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
+                                                    }} onClick={() => {
+
+                                                        setShowPicker(!showPicker)
+
+                                                    }
+
+                                                    }
+                                                ></div>
+                                                {showPicker && (
+                                                    <div className="absolute top-12 right-0 z-50 shadow-lg text-black bg-white border-2 rounded-lg">
+                                                        <div onClick={() => {
+                                                            console.log("clicked on cut");
+                                                            setShowPicker((prev) => {
+                                                                return false;
+                                                            });
+                                                        }} className=" right-2 top-2 z-20 bg-black text-white text-2xl absolute rounded-full rotate-45 cursor-pointer">
+                                                            <MdAdd />
+                                                        </div>
+                                                        <div className="m-10">
+                                                        </div>
+                                                        <SketchPicker
+
+                                                            color={color}
+                                                            onChangeComplete={(updatedColor) => {
+                                                                setColor(updatedColor.hex)
+                                                                addSnap({
+                                                                    removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                                    color: updatedColor.hex,
+                                                                    isBlur: false,
+                                                                    blurValue: 0,
+                                                                    bgImage: null, // ✅ Corrected Image URL
+                                                                    transparent: false,
+                                                                    isOpacity: false,
+                                                                    opacityValue: 0,
+                                                                });
+
+                                                            }}
+
+
+                                                        />
+                                                    </div>
+                                                )}
+                                                {
+                                                    ["green", "orange", "pink", "brown", "white", "red", "blue", "yellow", "gray",
+                                                        "purple", "cyan", "magenta", "lime", "teal", "maroon", "navy", "olive", "gold", "silver", "indigo", "violet"]
+                                                        .map((item, index) => (
+                                                            <div
+                                                                onClick={() => {
+                                                                    addSnap({
+                                                                        removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
+                                                                        color: item,
+                                                                        isBlur: false,
+                                                                        blurValue: 0,
+                                                                        bgImage: null, // ✅ Corrected Image URL
+                                                                        transparent: false,
+                                                                        isOpacity: false,
+                                                                        opacityValue: 0,
+                                                                    });
+                                                                    setIsBgOn(false)
+                                                                }}
+                                                                style={{ backgroundColor: `${item}` }}
+                                                                className="w-20 h-20 rounded-lg border-2"
+                                                                key={item + index}
+                                                            >
+                                                            </div>
+                                                        ))
+                                                }
+
+                                            </div>)
+                                        }
+                                    </div>) : null
+                                }
+                                <div className="flex items-center flex-col justify-center gap-2">
+                                    <div className="w-10 h-10 rounded-full border-2 border-blue-600 bg-blue-600 flex items-center justify-center">
+                                        <MdAutoFixHigh className="text-white text-2xl" />
+                                    </div>
+                                    <span className="text-xs italic">Effects</span>
+                                </div>
                             </div>
                         </div>
                         {/*image right section*/}
-                        <div className=" relative flex-1 items-center">
+                        <div className="hidden lg:block relative flex-1 items-center">
                             <div className="group mb-5 flex items-center gap-2 cursor-pointer p-2" onClick={() => setIsBgOn(true)}>
                                 <div className="border-4 border-gray-300 rounded-full transition-transform duration-200 group-hover:scale-105">
                                     <MdAdd className="p-1 text-3xl text-gray-500" />
@@ -508,7 +724,7 @@ const EditingPage = () => {
                         </div>
                     </div>
                     {/*footer  section*/}
-                    <div className="w-full h-20 flex items-end justify-between gap-3 px-10 absolute bottom-5">
+                    <div className="hidden  w-full h-20 lg:flex items-end justify-between gap-3 px-10 absolute bottom-5">
                         <div className="flex items-center justify-center gap-3">
                             <button className="text-2xl text-blue-500 p-4 rounded-lg bg-blue-100" onClick={() => {
                                 router.push("/")

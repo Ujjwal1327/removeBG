@@ -38,10 +38,10 @@ const Page = () => {
     }
   }, []);
   return (
-    <div className=" min-h-screen p-0 flex items-start w-full md:w-11/12  lg:w-9/12 mx-auto overflow-hidden flex-col lg:flex-row bg-white justify-center">
+    <div className="border-2 border-red-600 min-h-screen p-0 flex items-start w-full md:w-11/12  lg:w-9/12 mx-auto overflow-hidden flex-col lg:flex-row bg-white justify-center">
       {/* top - left*/}
       <div className=" flex-1 flex flex-col sm:flex-col items-center  md:flex-row lg:flex-col p-0 lg:px-10 overflow-hidden  w-full ">
-        <video ref={videoRef} src="/video.mp4" className=" rounded-3xl mb-5 object-cover mx-auto" height={400} width={400} muted autoPlay playsInline></video>
+        <video ref={videoRef} src="/video.mp4" className=" rounded-3xl mb-5 object-cover mx-auto min-h-64" height={400} width={400} muted autoPlay playsInline></video>
         <div className="">
           <h1 className="text-2xl  sm:w-full w-1/2 md:text-[40px] lg:text-[60px] text-center md:text-left m-auto text-[#454545] font-bold leading-[1]">
             Remove Image Background
