@@ -12,6 +12,12 @@ export default {
         foreground: "var(--foreground)",
       },
     },
+    screens: {
+      sm: '500px', // Change sm to 500px
+      md: '700px',
+      lg: '950px',
+      xl: '1280px',
+    },
   },
   plugins: [],
 };

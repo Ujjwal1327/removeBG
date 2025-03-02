@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import useSampleImages from "./hooks/useSampleImage";
 import { useImageContext } from "../context/ImageContextProvider";
 import useCloudinaryUpload from "./hooks/useCloudinaryUpload"; // Import Hook
+import { MdAdd } from "react-icons/md";
 
 const Page = () => {
-  const { images: sampleImages, error } = useSampleImages(4);
+  const { images: sampleImages, error, setError } = useSampleImages(4);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { addImage } = useImageContext();
@@ -37,21 +38,24 @@ const Page = () => {
     }
   }, []);
   return (
-    <div className="flex items-stretch bg-white justify-center gap-12">
-    
-      <div className="overflow-hidden ">
-        <video ref={videoRef} src="/video.mp4" className="rounded-3xl mb-5 object-cover" height={400} width={400} muted autoPlay playsInline></video>
-        <h1 className="text-[60px] text-gray-600 font-bold leading-[1]">
-          Remove Image <br /> Background
-        </h1>
-        <p className="text-gray-500 text-lg mt-5 font-bold">100% Automatically and Free</p>
-      </div>
+    <div className=" min-h-screen p-0 flex items-start w-full md:w-11/12  lg:w-9/12 mx-auto overflow-hidden flex-col lg:flex-row bg-white justify-center">
+      {/* top - left*/}
+      <div className=" flex-1 flex flex-col sm:flex-col items-center  md:flex-row lg:flex-col p-0 lg:px-10 overflow-hidden  w-full ">
+        <video ref={videoRef} src="/video.mp4" className=" rounded-3xl mb-5 object-cover mx-auto" height={400} width={400} muted autoPlay playsInline></video>
+        <div className="">
+          <h1 className="text-2xl  sm:w-full w-1/2 md:text-[40px] lg:text-[60px] text-center md:text-left m-auto text-[#454545] font-bold leading-[1]">
+            Remove Image Background
+          </h1>
+          <p className="text-gray-400 text-lg lg:text-2xl mt-2 font-semibold text-center md:text-left">100% Automatically and Free</p>
+        </div>
 
-      <div className=" min-h-[100vh] flex items-center flex-col justify-center">
+      </div>
+      {/* right - bottom*/}
+      <div className=" flex flex-1 p-0 items-center flex-col justify-center w-full px-5">
         {/* Drag & Drop Upload */}
-        <div style={{
-          boxShadow: "rgb(38, 57, 77) 0px 20px 30px -10px",
-        }} onDragOver={(e) => e.preventDefault()}
+        <div className="hidden lg:block h-28">
+        </div>
+        <div onDragOver={(e) => e.preventDefault()}
           onDrop={async (e) => {
             e.preventDefault();
             const file = e.dataTransfer.files[0];
@@ -63,16 +67,16 @@ const Page = () => {
               }
             }
           }}
-          className="w-96 h-96 bg-white shadow-2xl rounded-xl flex items-center justify-center flex-col "
+          className="w-full rounded-xl flex items-center justify-center flex-col  lg:h-96 lg:w-96 lg:shadow-2xl"
         >
-          <label className="text-2xl px-6 py-4 mb-10 bg-blue-600 text-white rounded-lg shadow-md cursor-pointer hover:bg-blue-700 transition">
+          <label className="text-2xl px-6 w-full lg:w-9/12 py-2 mb-2 bg-blue-600 text-white rounded-full text-center cursor-pointer hover:bg-blue-700 transition">
             {uploading ? "Uploading..." : "Upload Image"}
             <input type="file" className="hidden" onChange={handleFileChange} />
           </label>
-          {uploadError && <p className="text-red-600">{uploadError}</p>}
-          <p className="text-gray-500 text-xl font-bold">or drop a file,</p>
-          <p className="text-sm text-gray-600">
-            Paste image from{" "}
+          {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+          <p className="hidden text-gray-500 text-xl font-bold lg:block">or drop a file,</p>
+          <p className="text-sm text-gray-600 hidden lg:block">
+            Paste image from
             <span
               className="underline text-blue-600 cursor-pointer"
               onClick={async () => {
@@ -90,18 +94,18 @@ const Page = () => {
 
         {/* Sample Images */}
         <div className="mt-4">
-          <p className="text-gray-500 text-lg font-bold mb-2">No image? Try one of these.</p>
-          <div className="flex gap-4">
+          <p className="text-gray-500 text-sm text-center font-bold mb-2">No image? Try one of these.</p>
+          <div className="flex gap-4 items-center justify-center">
             {loading
-              ? [1, 2, 3, 4, 5].map((_, index) => (
-                <div className="w-20 h-20 bg-gray-300" key={index}></div>
+              ? [1, 2, 3, 4].map((_, index) => (
+                <div className="w-12 h-12 md:w-12 md:h-12 lg:w-20 lg:h-20 bg-gray-300" key={index}></div>
               ))
               : sampleImages.map((img, index) => (
                 <img
                   key={index}
                   src={img}
                   alt={`Sample ${index + 1}`}
-                  className="w-20 h-20 object-cover rounded-xl cursor-pointer border"
+                  className="w-12 h-12 md:w-16 md:h-16 lg:h-20 lg:w-20 object-cover rounded-xl cursor-pointer border"
                   onClick={() => {
                     addImage(img);
                     router.push("/editing");
@@ -109,13 +113,12 @@ const Page = () => {
                 />
               ))}
           </div>
-          <p className="text-lg text-red-700 font-bold">{error}</p>
+          {error && <p className="absolute top-10 bg-gray-500 px-3 py-1 w-[96%] text-white right-[2%] text-lg font-bold">{error}
+            <MdAdd onClick={() => setError(null)} className="absolute top-1 right-1 bg-white rotate-45 text-lg text-gray-600 font-bold  rounded-full" />
+          </p>}
         </div>
       </div>
     </div>
-
-
-
   );
 };
 

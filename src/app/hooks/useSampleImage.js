@@ -14,7 +14,7 @@ const useSampleImages = (count = 5) => {
             );
     }, [count]);
 
-    return { images, error };
+    return { images, error , setError };
 };
 
 export default useSampleImages;

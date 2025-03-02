@@ -7,7 +7,6 @@ import { Stage, Layer, Image, Rect, Group } from "react-konva";
 import useRemoveBgAlt from "../hooks/useRemoveBgAlt";
 import useSampleImages from "../hooks/useSampleImage.js";
 import { useRouter } from "next/navigation";
-import { MdCircle, MdOutlineCompare } from "react-icons/md";
 import { MdAdd, MdHeartBroken, MdAutoFixHigh } from "react-icons/md";
 import { RiSubtractLine } from "react-icons/ri";
 import { PiArrowBendUpLeftBold } from "react-icons/pi";
@@ -16,7 +15,7 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { useRef } from "react";
 import { SketchPicker } from "react-color";
 import { IoBanOutline } from "react-icons/io5";
-
+import { checkerboardPattern, reduFun, handleDownload, handleCheckboxChange, handleOpacityCheckboxChange, handleSliderRelease, handleOpacitySliderRelease, handleImageClick, undoFun } from "../../utils/functions.js"
 
 
 
@@ -26,7 +25,6 @@ const EditingPage = () => {
     const [color, setColor] = useState("#4F4F4F");
     const [showPicker, setShowPicker] = useState(false);
     const [imageDimensions, setImageDimensions] = useState({ width: 400, height: 400 });
-
     const { images: sampleImages } = useSampleImages(20);
     const { images, activeImage, setActiveImage, deleteImage, addSnap, handleRedo, handleUndo } = useImageContext();
     const [loading, setLoading] = useState(false);
@@ -50,130 +48,8 @@ const EditingPage = () => {
     const shouldRemoveBg = imageObj.history.length === 0 ? activeImage : null;
     // ✅ Call `useRemoveBgAlt()` only if needed
     const { processedImageUrl, error, setError } = useRemoveBgAlt(shouldRemoveBg, setLoading);
-    const reduFun = () => {
-        if (currentImage.activeSnap < currentImage.history.length - 1) {
-            console.log("redu is calling")
-            handleRedo()
-        }
-    }
-    const handleDownload = () => {
-        if (stageRef.current) {
-            const uri = stageRef.current.toDataURL({
-                pixelRatio: 1,
-                width: imageDimensions.width,  // Original Width
-                height: imageDimensions.height, // Original Height
-                mimeType: "image/png",
-                quality: 1,
-            });
-
-            const link = document.createElement("a");
-            link.href = uri;
-            link.download = "edited-image.png";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    };
 
 
-    const handleCheckboxChange = (isChecked) => {
-        addSnap({
-            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
-            color: currentImage.history[currentImage.activeSnap].color, // Current color
-            isBlur: isChecked, // ✅ Checkbox ka value
-            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
-            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
-            transparent: currentImage.history[currentImage.activeSnap].transparent,
-            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
-            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
-        });
-    };
-    const handleOpacityCheckboxChange = (isChecked) => {
-        addSnap({
-            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
-            color: currentImage.history[currentImage.activeSnap].color, // Current color
-            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
-            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
-            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
-            transparent: currentImage.history[currentImage.activeSnap].transparent,
-            isOpacity: isChecked,
-            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
-        });
-    };
-    const handleSliderRelease = () => {
-        addSnap({
-            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
-            color: currentImage.history[currentImage.activeSnap].color, // Current color
-            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
-            blurValue: Number(tempBlurValue), // ✅ Blur ka default value
-            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
-            transparent: currentImage.history[currentImage.activeSnap].transparent,
-            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
-            opacityValue: currentImage.history[currentImage.activeSnap].opacityValue,
-        });
-    }
-    const handleOpacitySliderRelease = () => {
-        addSnap({
-            removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
-            color: currentImage.history[currentImage.activeSnap].color, // Current color
-            isBlur: currentImage.history[currentImage.activeSnap].isBlur, // ✅ Checkbox ka value
-            blurValue: currentImage.history[currentImage.activeSnap].blurValue, // ✅ Blur ka default value
-            bgImage: currentImage.history[currentImage.activeSnap].bgImage,
-            transparent: currentImage.history[currentImage.activeSnap].transparent,
-            isOpacity: currentImage.history[currentImage.activeSnap].isOpacity,
-            opacityValue: Number(tempOpacityValue),
-        });
-    }
-    const handleImageClick = (imgSrc) => {
-        const imageObj = new window.Image();
-        imageObj.crossOrigin = "Anonymous"; // CORS issue avoid करने के लिए
-        imageObj.src = imgSrc;
-
-        imageObj.onload = () => {
-
-            // Send to addSnap with Valid URL
-            addSnap({
-                removeBgUrl: currentImage.history[currentImage.activeSnap].removeBgUrl,
-                color: null,
-                isBlur: false,
-                blurValue: 0,
-                bgImage: imageObj, // ✅ Corrected Image URL
-                transparent: false,
-                isOpacity: false,
-                opacityValue: 0,
-
-            });
-        };
-
-        imageObj.onerror = (error) => {
-            console.error("Failed to load image:", imgSrc, error);
-        };
-    };
-    const undoFun = () => {
-        if (currentImage.activeSnap > 0) {
-            console.log("undo is calling")
-            handleUndo()
-
-        }
-    }
-    const checkerboardPattern = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 20;
-        canvas.height = 20;
-        const ctx = canvas.getContext("2d");
-
-        ctx.fillStyle = "#ddd";
-        ctx.fillRect(0, 0, 20, 20);
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, 10, 10);
-        ctx.fillRect(10, 10, 10, 10);
-
-        // ✅ Convert canvas to Image
-        const img = new window.Image();
-        img.crossOrigin = "anonymous";
-        img.src = canvas.toDataURL();  // Convert canvas to data URL
-        return img;
-    };
 
     // ✅ Add  Removed Background Image to History
     useEffect(() => {
@@ -193,9 +69,6 @@ const EditingPage = () => {
         // console.log(currentImage)
 
     }, [processedImageUrl]);
-
-
-
     useEffect(() => {
         if (activeImage) {
             const img = new window.Image();
@@ -217,7 +90,6 @@ const EditingPage = () => {
             };
         }
     }, [activeImage]);
-
     //converting image for canvas
     useEffect(() => {
         if (!currentImage || !currentImage.history || !currentImage.history[currentImage.activeSnap]) return;
@@ -264,7 +136,34 @@ const EditingPage = () => {
                                 scaleX={scale} // Applying scale
                                 scaleY={scale}
                             ><Layer >
-                                    
+
+                                    {currentImage &&
+                                        currentImage.id &&
+                                        currentImage.history &&
+                                        currentImage.history[currentImage.activeSnap] && (
+                                            <Image
+                                                image={(() => {
+                                                    const img = new window.Image();
+                                                    img.crossOrigin = "Anonymous"; // Prevent CORS issues
+                                                    img.onload = () => {
+                                                        console.log("Image Loaded Successfully"); // Debugging
+                                                    };
+                                                    img.onerror = () => {
+                                                        console.error("Failed to load image:", currentImage.id);
+                                                    };
+                                                    img.src = currentImage.id; // Ensure this is a valid URL
+                                                    return img;
+                                                })()}
+                                                width={imageDimensions.width}
+                                                height={imageDimensions.height}
+                                                ref={(node) => {
+                                                    if (node) {
+                                                        node.cache(); // Apply filters correctly
+                                                        node.getLayer().batchDraw(); // Update the canvas
+                                                    }
+                                                }}
+                                            />
+                                        )}
 
                                     {/* Transparent tru ho tab */}
                                     {compare && currentImage.history && currentImage.history[currentImage.activeSnap] && currentImage.history[currentImage.activeSnap].transparent && (
@@ -331,10 +230,10 @@ const EditingPage = () => {
                                 <button className="hover:scale-110" onClick={() => {
                                     setCompare((prev) => !prev)
                                 }} >
-                                
-                                {
-                                    compare ? <IoIosGitCompare/> :<IoMdGitCompare  />
-                                }
+
+                                    {
+                                        compare ? <IoIosGitCompare /> : <IoMdGitCompare />
+                                    }
                                 </button>
                                 {
                                     currentImage.activeSnap == 0 ? (<button className=" text-gray-500 cursor-not-allowed" onClick={undoFun}><PiArrowBendUpLeftBold /></button>) : (<button className="hover:scale-110 text-black" onClick={undoFun}><PiArrowBendUpLeftBold /></button>)
