@@ -38,7 +38,7 @@ const Page = () => {
     }
   }, []);
   return (
-    <div className="border-2 border-red-600 min-h-screen p-0 flex items-start w-full md:w-11/12  lg:w-9/12 mx-auto overflow-hidden flex-col lg:flex-row bg-white justify-center">
+    <div className="mt-20 min-h-screen p-0 flex items-start w-full md:w-11/12  lg:w-9/12 mx-auto overflow-hidden flex-col lg:flex-row bg-white justify-center">
       {/* top - left*/}
       <div className=" flex-1 flex flex-col sm:flex-col items-center  md:flex-row lg:flex-col p-0 lg:px-10 overflow-hidden  w-full ">
         <video ref={videoRef} src="/video.mp4" className=" rounded-3xl mb-5 object-cover mx-auto min-h-64" height={400} width={400} muted autoPlay playsInline></video>
