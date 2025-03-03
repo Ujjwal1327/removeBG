@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ImageContextProvider } from "../context/ImageContextProvider.jsx"
 import { IoIosArrowDown } from "react-icons/io";
+import { GiHamburgerMenu } from "react-icons/gi";
 import { useState } from "react";
 
 const geistSans = Geist({
@@ -25,15 +26,16 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <nav className="fixed top-0 bg-white opacity-90 w-full flex items-center justify-between px-10 h-20 z-10"  >
-          <span id="logo" className="text-4xl font-bold  text-gray-800 flex-1">
+        <nav className=" fixed top-0 bg-white opacity-90 w-full flex items-center justify-between px-10 h-20 z-10"  >
+          <span id="logo" className="text-2xl sm:text-4xl font-bold  text-gray-800 flex-1">
             remove <span className="text-gray-600">bg</span>
           </span>
-          <ul className="flex items-center justify-center gap-2  text-gray-600 cursor-pointer">
+
+          <ul className="hidden lg:flex items-center justify-center gap-2  text-gray-600 cursor-pointer">
             <li className="hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
               Remove Background
             </li>
-            <li onClick={()=>setDropdown(!dropdown)} className="relative flex gap-5 items-center justify-center hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
+            <li onClick={() => setDropdown(!dropdown)} className="relative flex gap-5 items-center justify-center hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
               Features <IoIosArrowDown />
             </li>
             {
@@ -66,15 +68,15 @@ export default function RootLayout({ children }) {
             <li className="hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
               For Business
             </li>
-            <li className="hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
-              pricing
-            </li>
 
           </ul>
-          <ul className="flex items-center justify-end flex-1 gap-1 text-gray-600 cursor-pointer">
+          <ul className="hidden  lg:flex items-center justify-end flex-1 gap-1 text-gray-600 cursor-pointer">
             <li className="hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">Login</li>
             <li className=" hover:bg-gray-300 bg-gray-200 rounded-3xl text-black  px-6 py-2">SignUp</li>
           </ul>
+          <span className="block lg:hidden text-2xl sm:text-4xl font-bold  text-gray-800">
+            <GiHamburgerMenu />
+          </span>
         </nav>
         <ImageContextProvider>{children}</ImageContextProvider>
       </body>

@@ -36,7 +36,7 @@ const LoadingState = ({ width, height }) => {
                         </div>
                     </div>
                     {/*image right section*/}
-                    <div className="relative flex-1  flex flex-col items-start">
+                    <div className="relative flex-1 hidden lg:flex flex-col items-start">
                         <span className="bg-gray-300 text-gray-300 mb-5 gap-2 cursor-pointer p-2 rounded-lg">
                             <span className="border-4 border-gray-300 rounded-full transition-transform duration-200 group-hover:scale-105">
                                 <MdAdd className=" inline-block p-1 text-3xl text-gray-300" />

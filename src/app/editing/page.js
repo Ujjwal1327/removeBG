@@ -13,6 +13,8 @@ import { PiArrowBendUpLeftBold } from "react-icons/pi";
 import { PiArrowBendUpRightBold } from "react-icons/pi";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { useRef } from "react";
+import { IoIosArrowDown } from "react-icons/io";
+import { GiHamburgerMenu } from "react-icons/gi";
 import { SketchPicker } from "react-color";
 import { IoBanOutline, IoDownload } from "react-icons/io5";
 // import { checkerboardPattern, reduFun, handleDownload, handleCheckboxChange, handleOpacityCheckboxChange, handleSliderRelease, handleOpacitySliderRelease, handleImageClick, undoFun } from "../../utils/functions.js"
@@ -22,6 +24,7 @@ import { FaArrowDown } from "react-icons/fa6";
 
 
 const EditingPage = () => {
+    const [dropdown, setDropdown] = useState(false);
     const [scale, setScale] = useState(1); // Default scale 1 (Normal)
     const [color, setColor] = useState("#4F4F4F");
     const [showPicker, setShowPicker] = useState(false);
@@ -240,6 +243,58 @@ const EditingPage = () => {
     console.log(images)
     return (
         <div className=" w-full relative flex gap-2 flex-col items-center justify-center min-h-screen bg-white pt-5">
+            <nav className=" fixed top-0 mb-20 bg-white opacity-90 w-full flex items-center justify-between px-10 h-20 z-10"  >
+                <span id="logo" className="text-2xl sm:text-4xl font-bold  text-gray-800 flex-1">
+                    remove <span className="text-gray-600">bg</span>
+                </span>
+
+                <ul className="hidden lg:flex items-center justify-center gap-2  text-gray-600 cursor-pointer">
+                    <li className="hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
+                        Remove Background
+                    </li>
+                    <li onClick={() => setDropdown(!dropdown)} className="relative flex gap-5 items-center justify-center hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
+                        Features <IoIosArrowDown />
+                    </li>
+                    {
+                        dropdown && <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-white shadow-2xl p-3 rounded-2xl">
+                            <ul className="flex flex-col w-96 gap-2 ">
+                                <li className="flex gap-2 hover:bg-gray-200 p-3 rounded-xl">
+                                    <img className="h-16 w-20 rounded-lg" src="https://images.unsplash.com/photo-1739056656210-7c3cab6fff42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MTMyNjl8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDA5ODEwOTZ8&ixlib=rb-4.0.3&q=80&w=400" alt="asdfghj" />
+                                    <div className="flex flex-col items-start">
+                                        <h2 className="text-black">ggh kljk j</h2>
+                                        <p className="leading-4">Lorem ipsum dolor sit amet cloribus est veniam! Sapiente.</p>
+                                    </div>
+                                </li>
+                                <li className="flex gap-2 hover:bg-gray-200 p-2 rounded-xl">
+                                    <img className="h-16 w-20 rounded-lg" src="https://images.unsplash.com/photo-1739056656210-7c3cab6fff42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MTMyNjl8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDA5ODEwOTZ8&ixlib=rb-4.0.3&q=80&w=400" alt="asdfghj" />
+                                    <div className="flex flex-col items-start">
+                                        <h2 className="text-black">ggh kljk j</h2>
+                                        <p className="leading-4">Lorem ipsum dolor sit amet cloribus est veniam! Sapiente.</p>
+                                    </div>
+                                </li>
+                                <li className="flex gap-2 hover:bg-gray-200 p-2 rounded-xl">
+                                    <img className="h-16 w-20 rounded-lg" src="https://images.unsplash.com/photo-1739056656210-7c3cab6fff42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MTMyNjl8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NDA5ODEwOTZ8&ixlib=rb-4.0.3&q=80&w=400" alt="asdfghj" />
+                                    <div className="flex flex-col items-start">
+                                        <h2 className="text-black">ggh kljk j</h2>
+                                        <p className="leading-4">Lorem ipsum dolor sit amet cloribus est veniam! Sapiente.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    <li className="hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">
+                        For Business
+                    </li>
+
+                </ul>
+                <ul className="hidden  lg:flex items-center justify-end flex-1 gap-1 text-gray-600 cursor-pointer">
+                    <li className="hover:bg-gray-200 hover:rounded-3xl hover:text-black px-6 py-2">Login</li>
+                    <li className=" hover:bg-gray-300 bg-gray-200 rounded-3xl text-black  px-6 py-2">SignUp</li>
+                </ul>
+                <span className="block lg:hidden text-2xl sm:text-4xl font-bold  text-gray-800">
+                    <GiHamburgerMenu />
+                </span>
+            </nav>
             {
                 loading && (
                     <Loadingtate width={scaledDimensions.width}
@@ -247,7 +302,7 @@ const EditingPage = () => {
                 )
             }
             <div className="block lg:hidden w-full">
-                <div className="flex items-center justify-start w-10/12 mx-auto   gap-3">
+                <div className="flex items-center justify-start w-10/12 mx-auto mt-20  gap-3">
                     <button className="text-2xl text-blue-500 p-4 rounded-lg bg-blue-100" onClick={() => {
                         router.push("/")
                     }}>
