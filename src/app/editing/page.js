@@ -44,8 +44,8 @@ const EditingPage = () => {
     const [tempOpacityValue, setTempOpacityValue] = useState(0);
     const [scaledDimensions, setScaledDimensions] = useState({ width: 400, height: 400 });
 
-    const MAX_WIDTH = 400; // UI me Stage ka max width
-    const MAX_HEIGHT = 400; // UI me max height
+    const MAX_WIDTH = 500; // UI me Stage ka max width
+    const MAX_HEIGHT = 500; // UI me max height
     // ✅ Ensure `imageObj` is always defined
     const imageObj = images.find(img => img.id === activeImage) || { history: [], activeSnap: 0 };
     // ✅ Check if BG Removal is needed
